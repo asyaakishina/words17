@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Слова 9 класс</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #1a1a2e, #162131);
+      color: #fff;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 40px auto;
+      background-color: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 20px;
+      color: #00f9ff;
+      text-shadow: 0 0 10px rgba(0, 249, 255, 0.5);
+    }
+
+    .word-container {
+      margin: 30px 0;
+      font-size: 1.6rem;
+      color: #fff;
+      background: rgba(0, 255, 255, 0.1);
+      padding: 15px;
+      border-radius: 10px;
+      border: 1px solid #00f9ff;
+      margin-bottom: 20px;
+    }
+
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin: 20px 0;
+    }
+
+    .option {
+      padding: 15px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid #00f9ff;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 1.1rem;
+      text-align: left;
+      margin: 0 auto;
+      width: 80%;
+      max-width: 500px;
+    }
+
+    .option:hover {
+      background: rgba(0, 255, 255, 0.2);
+      transform: scale(1.02);
+    }
+
+    .option.correct {
+      background: rgba(0, 255, 0, 0.3);
+      border-color: #00ff00;
+    }
+
+    .option.incorrect {
+      background: rgba(255, 0, 0, 0.3);
+      border-color: #ff0000;
+    }
+
+    .result {
+      margin-top: 30px;
+      font-size: 1.4rem;
+      padding: 20px;
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: 10px;
+      display: none;
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 12px 30px;
+      font-size: 1.2rem;
+      background: linear-gradient(45deg, #00f9ff, #00bfff);
+      color: black;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.3s ease;
+      box-shadow: 0 5px 15px rgba(0, 249, 255, 0.4);
+    }
+
+    button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0, 249, 255, 0.6);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>Слова 9 класс</h1>
+    <div class="word-container" id="wordDisplay">Выберите английский перевод слова</div>
+
+    <div class="options" id="optionsContainer"></div>
+
+    <div class="result" id="result">
+      <p>✅ Правильно: <span id="correctCount">0</span></p>
+      <p>❌ Ошибки: <span id="wrongCount">0</span></p>
+      <button onclick="restartGame()">🔄 Начать заново</button>
+    </div>
+
+    <button onclick="startGame()" id="startButton">🚀 Начать игру</button>
+  </div>
+
+  <script>
+    const words = [
+      { eng: "admit", rus: "принимать, допускать" },
+      { eng: "artist", rus: "художник" },
+      { eng: "avoid", rus: "избегать" },
+      { eng: "bedbug", rus: "клоп" },
+      { eng: "below", rus: "менее чем" },
+      { eng: "borrow", rus: "одолживать" },
+      { eng: "break", rus: "перерыв, перемена" },
+      { eng: "bug", rus: "докуча́ть, надоедать" },
+      { eng: "can't help", rus: "быть не в состоянии контролировать свои чувства и поведение" },
+      { eng: "can't stand", rus: "не выносить кого-либо" },
+      { eng: "cockroach", rus: "таракан" },
+      { eng: "complain", rus: "жаловаться" },
+      { eng: "cross", rus: "пересекать, перехватывать" },
+      { eng: "deliver", rus: "доставлять" },
+      { eng: "deny", rus: "запрещать" },
+      { eng: "disease", rus: "болезнь" },
+      { eng: "dust mite", rus: "пылевой клещ" },
+      { eng: "expect", rus: "ожидать" }
+    ];
+
+    let currentWordIndex = 0;
+    let correctAnswers = 0;
+    let wrongAnswers = 0;
+    let gameStarted = false;
+
+    const wordDisplay = document.getElementById("wordDisplay");
+    const optionsContainer = document.getElementById("optionsContainer");
+    const resultDiv = document.getElementById("result");
+    const correctCount = document.getElementById("correctCount");
+    const wrongCount = document.getElementById("wrongCount");
+    const startButton = document.getElementById("startButton");
+
+    function shuffleArray(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    function showQuestion() {
+      if (currentWordIndex >= words.length) {
+        showResult();
+        return;
+      }
+
+      const word = words[currentWordIndex];
+      wordDisplay.textContent = word.rus; // Показываем русское слово
+      optionsContainer.innerHTML = "";
+
+      // Создаём варианты: правильный + 3 случайных
+      const allEng = [...words.map(w => w.eng)];
+      const incorrectOptions = [];
+      for (let i = 0; i < 3; i++) {
+        const randomIndex = Math.floor(Math.random() * allEng.length);
+        const option = allEng[randomIndex];
+        if (!incorrectOptions.includes(option) && option !== word.eng) {
+          incorrectOptions.push(option);
+        } else {
+          i--;
+        }
+      }
+
+      const options = [word.eng, ...incorrectOptions];
+      shuffleArray(options);
+
+      options.forEach(option => {
+        const btn = document.createElement("div");
+        btn.className = "option";
+        btn.textContent = option;
+        btn.onclick = () => checkAnswer(btn, option === word.eng);
+        optionsContainer.appendChild(btn);
+      });
+    }
+
+    function checkAnswer(btn, isCorrect) {
+      if (isCorrect) {
+        btn.classList.add("correct");
+        correctAnswers++;
+      } else {
+        btn.classList.add("incorrect");
+        wrongAnswers++;
+      }
+
+      document.querySelectorAll(".option").forEach(el => el.style.pointerEvents = "none");
+      currentWordIndex++;
+      setTimeout(showQuestion, 1000);
+    }
+
+    function showResult() {
+      resultDiv.style.display = "block";
+      correctCount.textContent = correctAnswers;
+      wrongCount.textContent = wrongAnswers;
+      startButton.style.display = "none";
+    }
+
+    function restartGame() {
+      currentWordIndex = 0;
+      correctAnswers = 0;
+      wrongAnswers = 0;
+      resultDiv.style.display = "none";
+      startButton.style.display = "block";
+      wordDisplay.textContent = "Выберите английский перевод слова";
+      optionsContainer.innerHTML = "";
+    }
+
+    function startGame() {
+      shuffleArray(words);
+      currentWordIndex = 0;
+      correctAnswers = 0;
+      wrongAnswers = 0;
+      startButton.style.display = "none";
+      showQuestion();
+    }
+  </script>
+
+</body>
+</html>
